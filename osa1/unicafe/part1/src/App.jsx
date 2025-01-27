@@ -1,5 +1,44 @@
 import { useState } from 'react'
 
+const Statistics = (props) => {
+
+  if (props.total === 0) {
+    return (
+      <div>
+        No feedback given
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <StatisticLine text="good" value = {props.good} />
+      <StatisticLine text="neutral" value = {props.neutral} />
+      <StatisticLine text="bad" value = {props.bad} />
+      <StatisticLine text="total" value = {props.total} />
+      <StatisticLine text="average" value = {(props.good*1 + props.bad*(-1)) / props.total} />
+      <StatisticLine text="positive" value = {(props.good*1/props.total)*100 + "%"} />
+    </div>
+  )
+}
+
+const StatisticLine = (props) => (
+  <table>
+    <tbody>
+      <tr>
+        <td>{props.text} </td>
+        <td>{props.value} </td>
+      </tr>
+    </tbody>
+  </table>
+)
+
+const Button = (props) => (
+  <button onClick={props.handleClick}>
+    {props.text}
+  </button>
+)
+
 const App = () => {
   // tallenna napit omaan tilaansa
   const [good, setGood] = useState(0)
@@ -11,53 +50,36 @@ const App = () => {
 
   const handleGoodClick = () => {
     console.log('good before', good)
-    const updatedGood = good + 1
-    const updatedNeutral = neutral
-    const updatedBad = bad
+    setTotal(total+1)
+    setGood(good + 1)
+    setAverage(average + 1)
+    setPositive(positive + 1)
     console.log('good after', good)
-    setGood(updatedGood)
-    setTotal(updatedGood + updatedNeutral + updatedBad)
-    setAverage(((1)*updatedGood + 0*updatedNeutral + (-1)*updatedBad)/(updatedGood + updatedNeutral + updatedBad))
-    setPositive(updatedGood/(updatedGood + updatedNeutral + updatedBad))
   }
 
   const handleNeutralClick = () => {
     console.log('neutral before', neutral)
-    const updatedNeutral = neutral + 1
-    const updatedGood = good
-    const updatedBad = bad
+    setTotal(total+1)
+    setNeutral(neutral + 1)
     console.log('neutral after', neutral)
-    setNeutral(updatedNeutral)
-    setTotal(updatedGood + updatedNeutral + updatedBad)
-    setAverage(((1)*updatedGood + 0*updatedNeutral + (-1)*updatedBad)/(updatedGood + updatedNeutral + updatedBad))
-    setPositive(updatedGood/(updatedGood + updatedNeutral + updatedBad))
   }
 
   const handleBadClick = () => {
     console.log('bad before', bad)
-    const updatedBad = bad + 1
-    const updatedNeutral = neutral
-    const updatedGood = good
+    setTotal(total+1)
+    setBad(bad + 1)
+    setAverage(average - 1)
     console.log('bad after', bad)
-    setBad(updatedBad)
-    setTotal(updatedGood + updatedNeutral + updatedBad)
-    setAverage(((1)*updatedGood + 0*updatedNeutral + (-1)*updatedBad)/(updatedGood + updatedNeutral + updatedBad))
-    setPositive(updatedGood/(updatedGood + updatedNeutral + updatedBad))
   }
 
   return (
     <div>
       <h2>give feedback</h2>
-      <button onClick={handleGoodClick}>Good</button>
-      <button onClick={handleNeutralClick}>Neutral</button>
-      <button onClick={handleBadClick}>Bad</button>
-      <h2>statistics</h2>
-      <p>Good {good}</p>
-      <p>Neutral {neutral}</p>
-      <p>Bad {bad}</p>
-      <p>All {total}</p>
-      <p>Average {average}</p>
-      <p>Positive {positive} %</p>
+      <Button handleClick={() => handleGoodClick(good + 1)} text = "good"/>
+        <Button handleClick={() => handleNeutralClick(neutral + 1)} text = "neutral"/>
+        <Button handleClick={() => handleBadClick(bad + 1)} text = "bad"/>
+      <h2>Statistics</h2>
+      <Statistics good={good} neutral={neutral} bad={bad} total={total} average={average} positive={positive}></Statistics>
     </div>
   )
 }
