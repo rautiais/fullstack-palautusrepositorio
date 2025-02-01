@@ -4,33 +4,44 @@ const Statistics = (props) => {
 
   if (props.total === 0) {
     return (
-      <div>
-        No feedback given
-      </div>
+      <tr>
+        <td> No feedback given </td>
+      </tr>
     )
   }
 
   return (
-    <div>
-      <StatisticLine text="good" value = {props.good} />
-      <StatisticLine text="neutral" value = {props.neutral} />
-      <StatisticLine text="bad" value = {props.bad} />
-      <StatisticLine text="total" value = {props.total} />
-      <StatisticLine text="average" value = {(props.good*1 + props.bad*(-1)) / props.total} />
-      <StatisticLine text="positive" value = {(props.good*1/props.total)*100 + "%"} />
-    </div>
+    <>
+    <tr>
+      <StatisticLine text="good"/>
+      <td>{props.good}</td>
+    </tr>
+    <tr>
+      <StatisticLine text="neutral"/>
+      <td>{props.neutral}</td>
+    </tr>
+    <tr>
+      <StatisticLine text="bad"/>
+      <td>{props.bad}</td>
+    </tr>
+    <tr>
+      <StatisticLine text="total"/>
+      <td>{props.total}</td>
+    </tr>
+    <tr>
+      <StatisticLine text="average"/>
+      <td>{(props.good*1 + props.bad*(-1)) / props.total} </td>
+    </tr>
+    <tr>
+      <StatisticLine text="positive"/>
+      <td>{(props.good*1/props.total)*100 + "%"}</td>
+    </tr>
+    </>
   )
 }
 
 const StatisticLine = (props) => (
-  <table>
-    <tbody>
-      <tr>
-        <td>{props.text} </td>
-        <td>{props.value} </td>
-      </tr>
-    </tbody>
-  </table>
+  <td>{props.text} </td>
 )
 
 const Button = (props) => (
@@ -75,11 +86,15 @@ const App = () => {
   return (
     <div>
       <h2>give feedback</h2>
-      <Button handleClick={() => handleGoodClick(good + 1)} text = "good"/>
+        <Button handleClick={() => handleGoodClick(good + 1)} text = "good"/>
         <Button handleClick={() => handleNeutralClick(neutral + 1)} text = "neutral"/>
         <Button handleClick={() => handleBadClick(bad + 1)} text = "bad"/>
       <h2>Statistics</h2>
-      <Statistics good={good} neutral={neutral} bad={bad} total={total} average={average} positive={positive}></Statistics>
+      <table>
+        <tbody>
+          <Statistics good={good} neutral={neutral} bad={bad} total={total} average={average} positive={positive}></Statistics>
+        </tbody>
+      </table>
     </div>
   )
 }
