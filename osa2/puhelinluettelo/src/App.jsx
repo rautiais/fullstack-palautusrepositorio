@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import personsService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -8,18 +8,18 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personsService.getAll().then((response) => {
       setPersons(response.data);
-    });
-  }, []);
+    })
+    },[]);
 
   const addNewPerson = (event) => {
     event.preventDefault();
     const personObject = {
       name: newName,
       number: newNumber,
-    }    
-    axios.post("http://localhost:3001/persons", personObject).then((response) => {
+    }
+    personsService.create(personObject).then((response) => {
       setPersons(persons.concat(response.data));
     });
     if (persons.some((person) => person.name === newName)) {
