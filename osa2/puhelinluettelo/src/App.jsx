@@ -31,6 +31,15 @@ const App = () => {
     setNewNumber("");
   };
 
+  const deletePerson = (id) => {
+    const person = persons.find((p) => p.id === id);
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personsService.delete(id).then(() => {
+        setPersons(persons.filter((p) => p.id !== id));
+      });
+    }
+  };
+
   const handleNameChange = (event) => {
     setNewName(event.target.value);
   };
@@ -92,8 +101,10 @@ const App = () => {
         {personsToShow.map((person) => (
           <div key={person.name}>
             {person.name} {person.number}
-          </div>
+            <button onClick={() => deletePerson(person.id)}>delete</button>
+        </div>
         ))}
+
       </div>
     </div>
   );
