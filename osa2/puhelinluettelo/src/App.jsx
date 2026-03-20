@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import personsService from "./services/persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     personsService.getAll().then((response) => {
       setPersons(response.data);
     })
     },[]);
+
+  const notify = (msg) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(null), 5000);
+  };
 
   const addNewPerson = (event) => {
     event.preventDefault();
@@ -25,6 +32,7 @@ const App = () => {
       setPersons(persons.concat(response.data));
       setNewName("");
       setNewNumber("");
+      notify(`${newName} added`);
     });
   };
 
@@ -34,6 +42,7 @@ const App = () => {
         setPersons(persons.map((person) => person.id !== id ? person : response.data));
         setNewName("");
         setNewNumber("");
+        notify(`${personObject.name} number updated`);
       });
     }
   };
@@ -43,6 +52,7 @@ const App = () => {
     if (window.confirm(`Delete ${person.name}?`)) {
       personsService.delete(id).then(() => {
         setPersons(persons.filter((p) => p.id !== id));
+        notify(`${person.name} deleted`);
       });
     }
   };
@@ -69,7 +79,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-  
+      <Notification message={message} />
       <div>
         filter shown with{" "}
         <input
