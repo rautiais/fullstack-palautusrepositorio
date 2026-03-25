@@ -1,0 +1,35 @@
+### Test: Add new person (success case)
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Art Hella",
+  "number": "040-123456"
+}
+
+### Test: Add person with missing name (bad request)
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "",
+  "number": "040-123459"
+}
+
+### Test: Add person with missing number (bad request)
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Art Hel",
+  "number": ""
+}
+
+### Test: Add person with duplicate name (conflict)
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "040-123456"
+}
