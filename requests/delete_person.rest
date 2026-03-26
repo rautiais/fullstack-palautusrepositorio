@@ -1,15 +1,11 @@
 ### Test: Delete existing person (success case)
 DELETE http://localhost:3001/api/persons/1
-Content-Type: application/json
 
 ### Test: Delete non-existent person (404 error)
 DELETE http://localhost:3001/api/persons/99999
-Content-Type: application/json
 
 ### Test: Delete person with invalid ID (bad request)
 DELETE http://localhost:3001/api/persons/invalid
-Content-Type: application/json
 
 ### Test: Verify person is deleted (should return 404)
 GET http://localhost:3001/api/persons/1
-Content-Type: application/json
