@@ -62,8 +62,17 @@ app.get("/api/persons/:id", (request, response) => {
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
-  persons = persons.filter((p) => p.id !== id);
 
+  if (isNaN(id)) {
+    return response.status(400).json({ error: "invalid id" });
+  }
+
+  const exists = persons.find((p) => p.id === id);
+  if (!exists) {
+    return response.status(404).json({ error: "person not found" });
+  }
+
+  persons = persons.filter((p) => p.id !== id);
   response.status(204).end();
 });
 
