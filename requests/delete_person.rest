@@ -1,11 +1,11 @@
 ### Test: Delete existing person (success case)
-DELETE http://localhost:3001/api/persons/1
+DELETE http://localhost:3001/api/persons/69ca3a1574eb3587aae8c3d0
 
 ### Test: Delete non-existent person (404 error)
-DELETE http://localhost:3001/api/persons/99999
+DELETE http://localhost:3001/api/persons/69ca3a1574eb3587aae8c3d5
 
 ### Test: Delete person with invalid ID (bad request)
-DELETE http://localhost:3001/api/persons/invalid
+DELETE http://localhost:3001/api/persons/123
 
 ### Test: Verify person is deleted (should return 404)
-GET http://localhost:3001/api/persons/1
+GET http://localhost:3001/api/persons/69ca3a1574eb3587aae8c3d0
