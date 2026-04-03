@@ -76,6 +76,9 @@ app.put('/api/persons/:id', (request, response, next) => {
     { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedPerson => {
+      if (!updatedPerson) {
+        return response.status(404).end()
+      }
       response.json(updatedPerson)
     })
     .catch(error => next(error))

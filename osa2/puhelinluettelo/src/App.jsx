@@ -8,6 +8,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
   const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     personsService.getAll().then((response) => {
@@ -15,8 +16,9 @@ const App = () => {
     })
     },[]);
 
-  const notify = (msg) => {
+  const notify = (msg, type = "success") => {
     setMessage(msg);
+    setMessageType(type);
     setTimeout(() => setMessage(null), 5000);
   };
 
@@ -34,7 +36,7 @@ const App = () => {
       setNewNumber("");
       notify(`${newName} added`);
     }).catch((error) => {
-      notify(error.response.data.error);
+      notify(error.response.data.error, "error");
     });
   };
 
@@ -45,16 +47,23 @@ const App = () => {
         setNewName("");
         setNewNumber("");
         notify(`${personObject.name} number updated`);
+      }).catch(() => {
+        notify(`Information of ${personObject.name} has already been removed from server`, "error");
+        setPersons(persons.filter((p) => p.id !== id));
       });
     }
   };
 
   const deletePerson = (id) => {
     const person = persons.find((p) => p.id === id);
+    if (!person) return;
     if (window.confirm(`Delete ${person.name}?`)) {
       personsService.delete(id).then(() => {
         setPersons(persons.filter((p) => p.id !== id));
-        notify(`${person.name} deleted`);
+        notify(`${person.name} deleted`, "error");
+      }).catch(() => {
+        notify(`Information of ${person.name} has already been removed from server`, "error");
+        setPersons(persons.filter((p) => p.id !== id));
       });
     }
   };
@@ -81,7 +90,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={message} />
+      <Notification message={message} type={messageType} />
       <div>
         filter shown with{" "}
         <input
