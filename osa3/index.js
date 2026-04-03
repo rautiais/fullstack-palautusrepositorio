@@ -11,6 +11,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" });
   }
 
+  if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  }
+
   next(error);
 }
 
@@ -43,7 +47,7 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -55,7 +59,7 @@ app.get("/api/persons/:id", (request, response) => {
     .catch(error => next(error));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(() => {
       response.status(204).end();
@@ -63,7 +67,7 @@ app.delete("/api/persons/:id", (request, response) => {
     .catch(error => next(error))
 });
 
-app.put("/api/persons/:id", (request, response) => {
+app.put("/api/persons/:id", (request, response, next) => {
   const { number } = request.body;
 
   Person.findByIdAndUpdate(
@@ -77,7 +81,7 @@ app.put("/api/persons/:id", (request, response) => {
     .catch(error => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
   if (!body.name) {
@@ -93,9 +97,11 @@ app.post("/api/persons", (request, response) => {
     number: body.number,
   });
 
-  newPerson.save().then(savedPerson => {
-    response.json(savedPerson);
-  });
+  newPerson.save()
+    .then(savedPerson => {
+      response.json(savedPerson);
+    })
+    .catch(error => next(error));
 });
 
 app.use(errorHandler)

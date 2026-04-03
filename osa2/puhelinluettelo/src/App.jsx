@@ -28,15 +28,13 @@ const App = () => {
       updateNumber(existing.id, personObject);
       return;
     }
-    if (newName.length < 3) {
-      notify("Name must be at least 3 characters long");
-      return;
-    }
     personsService.create(personObject).then((response) => {
       setPersons(persons.concat(response.data));
       setNewName("");
       setNewNumber("");
       notify(`${newName} added`);
+    }).catch((error) => {
+      notify(error.response.data.error);
     });
   };
 
