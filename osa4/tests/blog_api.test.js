@@ -112,6 +112,38 @@ describe('POST /api/blogs', () => {
   })
 })
 
+describe('PUT /api/blogs/:id', () => {
+  test('succeeds in updating likes', async () => {
+    const blogsAtStart = await api.get('/api/blogs')
+    const blogToUpdate = blogsAtStart.body[0]
+
+    const updatedData = { ...blogToUpdate, likes: blogToUpdate.likes + 1 }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(response.body.likes, blogToUpdate.likes + 1)
+  })
+})
+
+describe('DELETE /api/blogs/:id', () => {
+  test('succeeds with 204 if id is valid', async () => {
+    const blogsAtStart = await api.get('/api/blogs')
+    const blogToDelete = blogsAtStart.body[0]
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+    const blogsAtEnd = await api.get('/api/blogs')
+    assert.strictEqual(blogsAtEnd.body.length, initialBlogs.length - 1)
+
+    const titles = blogsAtEnd.body.map((b) => b.title)
+    assert.ok(!titles.includes(blogToDelete.title))
+  })
+})
+
 after(async () => {
   await mongoose.connection.close()
 })

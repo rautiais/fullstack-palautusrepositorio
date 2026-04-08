@@ -27,6 +27,28 @@ app.get("/api/blogs", async (request, response) => {
   response.json(blogs);
 });
 
+app.put("/api/blogs/:id", async (request, response, next) => {
+  try {
+    const updated = await Blog.findByIdAndUpdate(
+      request.params.id,
+      request.body,
+      { new: true, runValidators: true, context: 'query' }
+    );
+    response.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/blogs/:id", async (request, response, next) => {
+  try {
+    await Blog.findByIdAndDelete(request.params.id);
+    response.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/blogs", async (request, response, next) => {
   const blog = new Blog(request.body);
 
