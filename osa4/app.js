@@ -1,22 +1,43 @@
-const express = require('express')
-const Blog = require('./models/blog')
+const express = require("express");
+const mongoose = require("mongoose");
+const config = require("./utils/config");
+const logger = require("./utils/logger");
+const Blog = require("./models/blog");
+const middleware = require("./utils/middleware");
 
-const app = express()
+const app = express();
 
-app.use(express.json())
+logger.info("connecting to", config.MONGODB_URI);
 
-app.get('/api/blogs', (request, response) => {
-  Blog.find({}).then((blogs) => {
-    response.json(blogs)
+mongoose
+  .connect(config.MONGODB_URI)
+  .then(() => {
+    logger.info("connected to MongoDB");
   })
-})
+  .catch((error) => {
+    logger.error("error connection to MongoDB:", error.message);
+  });
 
-app.post('/api/blogs', (request, response) => {
-  const blog = new Blog(request.body)
+app.use(express.static("dist"));
+app.use(express.json());
+app.use(middleware.requestLogger);
 
-  blog.save().then((result) => {
-    response.status(201).json(result)
-  })
-})
+app.get("/api/blogs", async (request, response) => {
+  const blogs = await Blog.find({});
+  response.json(blogs);
+});
 
-module.exports = app
+app.post("/api/blogs", async (request, response, next) => {
+  const blog = new Blog(request.body);
+
+  try {
+    const result = await blog.save();
+    response.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use(middleware.errorHandler);
+
+module.exports = app;
