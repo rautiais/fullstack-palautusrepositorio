@@ -1,0 +1,8 @@
+### Delete a blog (replace TOKEN and BLOG_ID)
+DELETE http://localhost:3003/api/blogs/69d7a5f8ac089d8b8c22e9de
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY5ZDdhNGRlZDUwNWQyNmJkZDZkODdmOSIsImlhdCI6MTc3NTc0MDkzNiwiZXhwIjoxNzc1NzQ0NTM2fQ.NTNrOX3ZGmffDZ3HMbxPDoHGg0wxSfUym53RyGemZTU
+
+###
+
+### Delete without token (should return 401)
+DELETE http://localhost:3003/api/blogs/69d7a5f8ac089d8b8c22e9de

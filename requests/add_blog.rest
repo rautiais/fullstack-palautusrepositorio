@@ -1,7 +1,7 @@
 ### Add a blog (replace TOKEN with value from login response)
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
-Authorization: Bearer TOKEN
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY5ZDdhNGRlZDUwNWQyNmJkZDZkODdmOSIsImlhdCI6MTc3NTc0MDkzNiwiZXhwIjoxNzc1NzQ0NTM2fQ.NTNrOX3ZGmffDZ3HMbxPDoHGg0wxSfUym53RyGemZTU
 
 {
   "title": "Test Blog",
