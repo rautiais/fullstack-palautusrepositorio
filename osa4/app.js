@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./utils/config");
 const logger = require("./utils/logger");
 const Blog = require("./models/blog");
+const User = require("./models/user");
 const middleware = require("./utils/middleware");
 const loginRouter = require('./controllers/login')
 const usersRouter = require('./controllers/users')
@@ -27,8 +28,13 @@ app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 
 app.get("/api/blogs", async (request, response) => {
-  const blogs = await Blog.find({});
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
   response.json(blogs);
+});
+
+app.get("/api/users", async (request, response) => {
+  const users = await User.find({}).populate('blogs', { title: 1, author: 1, url: 1 });
+  response.json(users);
 });
 
 app.put("/api/blogs/:id", async (request, response, next) => {
@@ -54,10 +60,14 @@ app.delete("/api/blogs/:id", async (request, response, next) => {
 });
 
 app.post("/api/blogs", async (request, response, next) => {
-  const blog = new Blog(request.body);
-
   try {
+    const user = await User.findOne({});
+    const blog = new Blog({ ...request.body, user: user._id });
     const result = await blog.save();
+
+    user.blogs = user.blogs.concat(result._id);
+    await user.save();
+
     response.status(201).json(result);
   } catch (error) {
     next(error);
