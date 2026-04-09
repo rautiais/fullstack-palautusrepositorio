@@ -16,8 +16,10 @@
     "format": "eslint . --fix"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "lint": "^0.8.19",
     "mongoose": "^9.4.1"
   },

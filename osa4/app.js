@@ -4,6 +4,8 @@ const config = require("./utils/config");
 const logger = require("./utils/logger");
 const Blog = require("./models/blog");
 const middleware = require("./utils/middleware");
+const loginRouter = require('./controllers/login')
+const usersRouter = require('./controllers/users')
 
 const app = express();
 
@@ -21,6 +23,8 @@ mongoose
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(middleware.requestLogger);
+app.use('/api/login', loginRouter)
+app.use('/api/users', usersRouter)
 
 app.get("/api/blogs", async (request, response) => {
   const blogs = await Blog.find({});
