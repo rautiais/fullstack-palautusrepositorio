@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./utils/config");
 const logger = require("./utils/logger");
+const jwt = require('jsonwebtoken')
 const Blog = require("./models/blog");
 const User = require("./models/user");
 const middleware = require("./utils/middleware");
@@ -24,6 +25,7 @@ mongoose
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(middleware.requestLogger);
+app.use(middleware.tokenExtractor);
 app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 
@@ -61,7 +63,12 @@ app.delete("/api/blogs/:id", async (request, response, next) => {
 
 app.post("/api/blogs", async (request, response, next) => {
   try {
-    const user = await User.findOne({});
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
     const blog = new Blog({ ...request.body, user: user._id });
     const result = await blog.save();
 
