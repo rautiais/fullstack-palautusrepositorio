@@ -2,12 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./utils/config");
 const logger = require("./utils/logger");
-const jwt = require('jsonwebtoken')
-const Blog = require("./models/blog");
 const User = require("./models/user");
 const middleware = require("./utils/middleware");
-const loginRouter = require('./controllers/login')
-const usersRouter = require('./controllers/users')
+const blogsRouter = require("./controllers/blogs");
+const loginRouter = require("./controllers/login");
+const usersRouter = require("./controllers/users");
 
 const app = express();
 
@@ -26,73 +25,18 @@ app.use(express.static("dist"));
 app.use(express.json());
 app.use(middleware.requestLogger);
 app.use(middleware.tokenExtractor);
-app.use('/api/login', loginRouter)
-app.use('/api/users', usersRouter)
 
-app.get("/api/blogs", async (request, response) => {
-  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
-  response.json(blogs);
-});
+app.use("/api/blogs", middleware.userExtractor, blogsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/login", loginRouter);
 
 app.get("/api/users", async (request, response) => {
-  const users = await User.find({}).populate('blogs', { title: 1, author: 1, url: 1 });
+  const users = await User.find({}).populate("blogs", {
+    title: 1,
+    author: 1,
+    url: 1,
+  });
   response.json(users);
-});
-
-app.put("/api/blogs/:id", async (request, response, next) => {
-  try {
-    const updated = await Blog.findByIdAndUpdate(
-      request.params.id,
-      request.body,
-      { new: true, runValidators: true, context: 'query' }
-    );
-    response.json(updated);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.delete("/api/blogs/:id", async (request, response, next) => {
-  try {
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
-
-    const blog = await Blog.findById(request.params.id)
-    if (!blog) {
-      return response.status(404).json({ error: 'blog not found' })
-    }
-
-    if (blog.user.toString() !== decodedToken.id.toString()) {
-      return response.status(403).json({ error: 'only the creator can delete this blog' })
-    }
-
-    await blog.deleteOne()
-    response.status(204).end();
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post("/api/blogs", async (request, response, next) => {
-  try {
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
-
-    const user = await User.findById(decodedToken.id)
-    const blog = new Blog({ ...request.body, user: user._id });
-    const result = await blog.save();
-
-    user.blogs = user.blogs.concat(result._id);
-    await user.save();
-
-    response.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
 });
 
 app.use(middleware.errorHandler);
