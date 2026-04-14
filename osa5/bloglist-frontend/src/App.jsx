@@ -1,145 +1,210 @@
-import { useState, useEffect } from "react";
-import Blog from "./components/Blog";
-import Notification from "./components/Notification";
-import blogService from "./services/blogs";
-import loginService from "./services/login";
+import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
+import { Container } from '@mui/material'
+import Blog from './components/Blog'
+import BlogView from './components/BlogView'
+import NewBlogPage from './components/NewBlogPage'
+import Notification from './components/Notification'
+import blogService from './services/blogs'
+import loginService from './services/login'
 
-const App = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
-  const [notification, setNotification] = useState(null);
-
-  const notify = (message, type = "success") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
-
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
-    }
-  }, []);
-
-  const addBlog = (event) => {
-    event.preventDefault();
-    const blogObject = { title, author, url };
-    blogService.create(blogObject).then((createdBlog) => {
-      setBlogs(blogs.concat(createdBlog));
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      notify(`a new blog ${blogObject.title} by ${blogObject.author} added`);
-    });
-  };
-
+const LoginPage = ({ onLogin, notify }) => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
     try {
-      const user = await loginService.login({ username, password });
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-      blogService.setToken(user.token);
-      setUser(user);
-      setUsername("");
-      setPassword("");
+      const user = await onLogin({ username, password })
+      if (user) navigate('/')
     } catch {
-      notify("wrong username or password", "error");
+      notify('wrong username or password', 'error')
     }
-  };
+  }
 
-  const handleLogout = () => {
-    window.localStorage.removeItem("loggedBlogappUser");
-    setUser(null);
-  };
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    maxWidth: 400,
+    background: '#fff',
+    padding: 20,
+    borderRadius: 6,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+  }
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        <label>
-          username
-          <input
-            type="text"
-            value={username}
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          password
-          <input
-            type="password"
-            value={password}
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </label>
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
+  const fieldStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+    fontSize: 14,
+  }
 
-  if (user === null) {
-    return (
-      <div>
-        <h2>Log in to application</h2>
-        <Notification message={notification?.message} type={notification?.type} />
-        {loginForm()}
-      </div>
-    );
+  const inputStyle = {
+    padding: '6px 10px',
+    border: '1px solid #ccc',
+    borderRadius: 4,
+    fontSize: 14,
+  }
+
+  const buttonStyle = {
+    alignSelf: 'flex-start',
+    padding: '7px 18px',
+    background: '#333',
+    color: '#f9b8ff',
+    border: 'none',
+    borderRadius: 4,
+    cursor: 'pointer',
+    fontSize: 14,
   }
 
   return (
     <div>
-      <h2>Blogs</h2>
-      <Notification message={notification?.message} type={notification?.type} />
-      <p>
-        {user.name} logged in <button onClick={handleLogout}>logout</button>
-      </p>
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
-      ))}
-      <h2>create new</h2>
-      <form onSubmit={addBlog}>
-        <div>
-          title
+      <h2>Log in to application</h2>
+      <form onSubmit={handleLogin} style={formStyle}>
+        <div style={fieldStyle}>
+          <label>username</label>
           <input
             type="text"
-            value={title}
-            onChange={({ target }) => setTitle(target.value)}
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+            style={inputStyle}
           />
         </div>
-        <div>
-          author
+        <div style={fieldStyle}>
+          <label>password</label>
           <input
-            type="text"
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+            style={inputStyle}
           />
         </div>
-        <div>
-          url
-          <input
-            type="text"
-            value={url}
-            onChange={({ target }) => setUrl(target.value)}
-          />
-        </div>
-        <button type="submit">create</button>
+        <button type="submit" style={buttonStyle}>login</button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+const BlogsPage = ({ blogs }) => (
+  <div>
+    {[...blogs].sort((a, b) => b.likes - a.likes).map((blog) => (
+      <Blog key={blog.id} blog={blog} />
+    ))}
+  </div>
+)
+
+const App = () => {
+  const [blogs, setBlogs] = useState([])
+  const [user, setUser] = useState(null)
+  const [notification, setNotification] = useState(null)
+
+  const notify = (message, type = 'success') => {
+    setNotification({ message, type })
+    setTimeout(() => setNotification(null), 5000)
+  }
+
+  useEffect(() => {
+    blogService.getAll().then(setBlogs)
+  }, [])
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
+  const handleLogin = async (credentials) => {
+    const loggedUser = await loginService.login(credentials)
+    window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
+    blogService.setToken(loggedUser.token)
+    setUser(loggedUser)
+    return loggedUser
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
+  }
+
+  const updateBlog = (updatedBlog) => {
+    setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)))
+  }
+
+  const deleteBlog = (id) => {
+    setBlogs(blogs.filter((b) => b.id !== id))
+  }
+
+  const addBlog = (blogObject) => {
+    return blogService.create(blogObject).then((createdBlog) => {
+      setBlogs(blogs.concat(createdBlog))
+      notify(`a new blog ${blogObject.title} by ${blogObject.author} added`)
+    }).catch(() => {
+      notify('failed to create blog', 'error')
+      throw new Error('failed to create blog')
+    })
+  }
+
+  return (
+    <Container>
+    <Router>
+      <div>
+        <nav style={{
+          background: '#41003c',
+          padding: '10px 20px',
+          marginBottom: 20,
+          borderRadius: 4,
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Blog App</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Link to="/" style={{ color: '#f9b8ff', textDecoration: 'none', fontWeight: 'bold', letterSpacing: 1 }}>BLOGS</Link>
+            {user && <Link to="/new" style={{ color: '#f9b8ff', textDecoration: 'none', fontWeight: 'bold', letterSpacing: 1 }}>NEW BLOG</Link>}
+            {user
+              ? <button onClick={handleLogout} style={{
+                  background: 'none',
+                  border: '1px solid #f9b8ff',
+                  color: '#f9b8ff',
+                  padding: '3px 12px',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  letterSpacing: 1,
+                }}>LOGOUT</button>
+              : <Link to="/login" style={{ color: '#f9b8ff', textDecoration: 'none', fontWeight: 'bold', letterSpacing: 1 }}>LOGIN</Link>
+            }
+          </div>
+        </nav>
+
+        <Notification message={notification?.message} type={notification?.type} />
+
+        <Routes>
+          <Route path="/login" element={
+            user ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} notify={notify} />
+          } />
+          <Route path="/" element={<BlogsPage blogs={blogs} />} />
+          <Route path="/new" element={
+            user ? <NewBlogPage onCreate={addBlog} /> : <Navigate to="/login" />
+          } />
+          <Route path="/blogs/:id" element={
+            <BlogView
+              blogs={blogs}
+              onUpdate={updateBlog}
+              onDelete={deleteBlog}
+              currentUser={user}
+              notify={notify}
+            />
+          } />
+        </Routes>
+      </div>
+    </Router>
+    </Container>
+  )
+}
+
+export default App

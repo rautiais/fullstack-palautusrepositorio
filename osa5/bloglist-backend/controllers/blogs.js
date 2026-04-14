@@ -19,6 +19,7 @@ blogsRouter.post("/", async (request, response, next) => {
     user.blogs = user.blogs.concat(result._id);
     await user.save();
 
+    await result.populate("user", { username: 1, name: 1 });
     response.status(201).json(result);
   } catch (error) {
     next(error);
@@ -31,7 +32,7 @@ blogsRouter.put("/:id", async (request, response, next) => {
       request.params.id,
       request.body,
       { new: true, runValidators: true, context: "query" },
-    );
+    ).populate("user", { username: 1, name: 1 });
     response.json(updated);
   } catch (error) {
     next(error);

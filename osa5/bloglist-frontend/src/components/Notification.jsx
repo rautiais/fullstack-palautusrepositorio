@@ -1,14 +1,17 @@
 const Notification = ({ message, type }) => {
   if (!message) return null
 
+  const isError = type === 'error'
+
   const style = {
-    border: `2px solid ${type === 'error' ? 'red' : 'green'}`,
-    color: type === 'error' ? 'red' : 'green',
-    background: '#f0f0f0',
-    fontSize: 16,
-    padding: '10px 16px',
+    background: isError ? '#fdecea' : '#e8f5e9',
+    color: isError ? '#c0392b' : '#27ae60',
+    border: `2px solid ${isError ? '#c0392b' : '#27ae60'}`,
+    padding: '12px 18px',
     marginBottom: 16,
-    borderRadius: 4,
+    borderRadius: 6,
+    fontWeight: 'bold',
+    fontSize: 15,
   }
 
   return <div style={style}>{message}</div>
